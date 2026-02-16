@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Spare Part Alternative Checker</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background:#f4f6f8;
+    text-align:center;
+    margin-top:60px;
+}
+
+.container {
+    background:white;
+    width:560px;
+    margin:auto;
+    padding:30px;
+    border-radius:8px;
+    box-shadow:0px 3px 12px rgba(0,0,0,0.2);
+}
+
+h2 { margin-bottom:25px; }
+
+input {
+    width:65%;
+    padding:10px;
+    font-size:16px;
+}
+
+button {
+    padding:10px 18px;
+    font-size:16px;
+    background:#0078D7;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover { background:#005fa3; }
+
+.result {
+    margin-top:25px;
+    text-align:left;
+    font-size:16px;
+    background:#f9fafb;
+    padding:15px;
+    border-radius:6px;
+    line-height:1.6;
+}
+
+.label { font-weight:bold; }
+.section { margin-top:12px; }
+.desc {
+    margin-left:12px;
+    color:#444;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>SPARE PART ALTERNATIVE CHECK</h2>
+
+<input type="text" id="codeInput" placeholder="Enter Spare Code">
+<button onclick="searchCode()">Search</button>
+
+<div class="result" id="result"></div>
+</div>
+
+<script>
+let spareData = [];
+
+// Load CSV
+fetch('sparedata.csv')
+.then(response => response.text())
+.then(text => {
+
+    const rows = text.split("\n").slice(1);
+
+    rows.forEach(row => {
+        const cols = row.split(",");
+
+        if(cols.length >= 4){
+            spareData.push({
+                code: cols[0].trim(),
+                desc: cols[1].trim(),
+                altCode: cols[2].trim(),
+                altDesc: cols[3].trim()
+            });
+        }
+    });
+});
+
+function searchCode() {
+
+    const input = document.getElementById("codeInput").value.trim();
+    const resultBox = document.getElementById("result");
+
+    if(input === ""){
+        resultBox.innerHTML = "Please enter a spare code.";
+        return;
+    }
+
+    let found = spareData.find(x => x.code === input);
+
+    if(found){
+
+        let altSection = (found.altCode !== "")
+            ? "<div class='section'><span class='label'>Alternative Code:</span> " + found.altCode + "</div>" +
+              "<div class='desc'>" + found.altDesc + "</div>"
+            : "<div class='section'><span class='label'>Alternative:</span> No alternatives present currently</div>";
+
+        resultBox.innerHTML =
+            "<div><span class='label'>Spare Code:</span> " + found.code + "</div>" +
+            "<div class='desc'>" + found.desc + "</div>" +
+            altSection;
+
+    } else {
+        resultBox.innerHTML = "No alternatives present currently";
+    }
+}
+</script>
+
+</body>
+</html>
